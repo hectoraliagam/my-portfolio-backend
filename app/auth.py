@@ -1,3 +1,4 @@
+# app/auth.py
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from typing import Optional

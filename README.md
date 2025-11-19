@@ -1,107 +1,121 @@
 # Backend - Portfolio Contact API
 
-This is the backend API for my personal portfolio contact form, built with FastAPI, SQLAlchemy, and FastAPI-Mail. It handles contact submissions, email notifications, and stores data securely.
+Este es el backend de mi portafolio personal, construido con
+**FastAPI**, **SQLAlchemy**, y la API HTTP de **Brevo** para el envío de
+correos.\
+El sistema procesa envíos del formulario de contacto, valida reCAPTCHA
+v3, guarda mensajes en la base de datos y envía notificaciones por
+correo de forma confiable incluso en producción.
 
-## Features
+## 🚀 Características
 
-- Receive contact form submissions with name, email, and message
-- Store messages in a PostgreSQL database using SQLAlchemy ORM
-- Send email notifications via FastAPI-Mail with Gmail SMTP
-- Protect endpoints with reCAPTCHA v3 verification
-- Rate limiting to prevent abuse (3 submissions per minute)
-- CORS configured for seamless frontend integration
-- Environment variables for all sensitive credentials and configuration
+-   Recepción segura de mensajes del formulario de contacto (nombre,
+    email, mensaje)
+-   Almacenamiento de mensajes en PostgreSQL mediante SQLAlchemy ORM
+-   Envío de correos usando la **Brevo Transactional Email API** (no
+    SMTP)
+-   Protección con **reCAPTCHA v3**
+-   Límite de peticiones (rate limiting) → 3 solicitudes por minuto
+-   Configuración de CORS para integración con el frontend
+-   Variables de entorno para toda información sensible
 
-## Technologies
+## 🛠️ Tecnologías
 
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [SQLAlchemy](https://www.sqlalchemy.org/)
-- [FastAPI-Mail](https://github.com/sabuhish/fastapi-mail)
-- [PostgreSQL](https://www.postgresql.org/)
-- Python 3.9+
-- [httpx](https://www.python-httpx.org/) (for async HTTP requests)
-- [slowapi](https://github.com/laurentS/slowapi) (rate limiting)
-- [python-dotenv](https://github.com/theskumar/python-dotenv) (load .env variables)
+-   **FastAPI**
+-   **SQLAlchemy**
+-   **PostgreSQL**
+-   **Brevo API (v3)**
+-   **httpx**
+-   **slowapi** (rate limiting)
+-   **python-dotenv**
+-   Python **3.11+**
 
-## Setup and Run
+## 📦 Instalación y ejecución
 
-1. **Clone the repository**
+### 1. Clonar el repositorio
 
-```bash
-git clone <your-repo-url>
+``` bash
+git clone <tu-repo>
 cd backend
 ```
 
-2. **Create and activate a virtual environment**
+### 2. Crear un entorno virtual
 
-```bash
-python -m venv venv
-# On Linux/macOS
-source venv/bin/activate
-# On Windows
-venv\Scripts\activate
+``` bash
+python -m venv .venv
+# Linux/macOS
+source .venv/bin/activate
+# Windows
+.venv\Scripts\activate
 ```
 
-3. **Install dependencies**
+### 3. Instalar dependencias
 
-```bash
+``` bash
 pip install -r requirements.txt
 ```
 
-4. **Create a `.env` file with your configuration**
+### 4. Crear archivo `.env`
 
-```env
+``` env
 DATABASE_URL=postgresql://user:password@host:port/dbname
-MY_MAIL_USERNAME=your_email@gmail.com
-MY_MAIL_PASSWORD=your_gmail_app_password
-MY_MAIL_FROM=your_email@gmail.com
-MAIL_RECEIVER=receiver_email@example.com
-RECAPTCHA_SECRET_KEY=your_recaptcha_secret_key
-FRONTEND_URLS=https://yourfrontenddomain.com
+BREVO_API_KEY=tu_api_key
+MAIL_FROM=correo_que_envia@ejemplo.com
+MAIL_RECEIVER=correo_que_recibe@ejemplo.com
+RECAPTCHA_SECRET_KEY=tu_recaptcha_secret_key
+FRONTEND_URLS=https://tudominio.com
+IS_DEV=true
 ```
 
-5. **Run the development server**
+### 5. Ejecutar servidor de desarrollo
 
-```bash
+``` bash
 uvicorn app.main:app --reload
 ```
 
-## API Endpoint
+## 📡 Endpoint
 
 ### `POST /contact`
 
-Accepts contact form submissions, verifies reCAPTCHA, stores data, and sends email notifications.
+Recibe datos del formulario, valida reCAPTCHA, guarda en BD y envía
+correo mediante Brevo API.
 
-**Request body example:**
+### Body JSON
 
-```json
+``` json
 {
-  "name": "Juan Pancho",
-  "email": "juanelpancho@example.com",
-  "message": "Hi Hector, I liked your portfolio. Let's talk!"
+  "name": "Hector Aliaga",
+  "email": "hector@example.com",
+  "message": "Hola, me gustó tu portafolio."
 }
 ```
 
-**Headers:**
+### Headers
 
-- `recaptcha-token`: the reCAPTCHA v3 token obtained from the frontend
+    recaptcha-token: <token_generado_en_el_frontend>
 
-**Rate Limit:** 3 requests per minute per IP
+### Respuesta
 
-**Response:**
-
-```json
+``` json
 {
-  "message": "Thank you for contacting me, I will respond to you immediately."
+  "message": "Gracias por contactarme, te responderé de inmediato."
 }
 ```
 
-## Notes
+## 🔐 Notas importantes
 
-- Ensure your Gmail account has an App Password set if using 2FA.
-- Adjust `FRONTEND_URLS` in your `.env` for CORS to allow requests from your frontend domain(s).
-- reCAPTCHA v3 helps protect your backend from spam and abuse.
+-   Brevo API v3 debe usarse con **API Key**, no SMTP Key.
 
-## License
+-   Render/Vercel deben tener las variables de entorno configuradas
+    correctamente.
 
-This project is licensed under the [MIT License](./LICENSE).
+-   Si usas localhost durante desarrollo, añade:
+
+        FRONTEND_URLS=http://localhost:5173
+
+-   reCAPTCHA v3 requiere que el dominio coincida exactamente con tu
+    dominio real.
+
+## 📄 Licencia
+
+Este proyecto está bajo la licencia MIT.
