@@ -9,8 +9,8 @@ class ContactForm(ContactBase):
     class Config:
         json_schema_extra = {
             "example": {
-                "name": "Juan Pancho",
-                "email": "juanelpancho@example.com",
-                "message": "Hi Hector, I liked your portfolio. Let's talk!"
+                "name": "Hector Aliaga",
+                "email": "hectoraliaga@example.com",
+                "message": "Hi, I liked your portfolio. Let's talk!"
             }
         }

@@ -4,10 +4,11 @@ from app.schemas import ContactForm
 from app.models import Contact, Base
 from app.database import engine, SessionLocal
 from app.auth import router as auth_router
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from slowapi import Limiter
+from pydantic import SecretStr
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
@@ -32,7 +33,7 @@ app.state.limiter = limiter
 def rate_limit_handler(request: Request, exc: RateLimitExceeded):
     return JSONResponse(
         status_code=429,
-        content={"detail": "Too many requests. Please slow down."}
+        content={"detail": "Demasiadas solicitudes. Por favor, reduce la velocidad."}
     )
 
 frontend_urls = os.getenv("FRONTEND_URLS", "https://localhost:5173").split(",")
@@ -54,11 +55,11 @@ def get_db():
         db.close()
 
 conf = ConnectionConfig(
-    MAIL_USERNAME=os.getenv("MY_MAIL_USERNAME"),
-    MAIL_PASSWORD=os.getenv("MY_MAIL_PASSWORD"),
-    MAIL_FROM=os.getenv("MY_MAIL_FROM"),
+    MAIL_USERNAME=os.getenv("MY_MAIL_USERNAME", ""),
+    MAIL_PASSWORD=SecretStr(os.getenv("MY_MAIL_PASSWORD", "")),
+    MAIL_FROM=os.getenv("MY_MAIL_FROM", ""),
     MAIL_PORT=587,
-    MAIL_SERVER="smtp.gmail.com",
+    MAIL_SERVER="smtp-relay.brevo.com",
     MAIL_STARTTLS=True,
     MAIL_SSL_TLS=False,
     USE_CREDENTIALS=True
@@ -91,14 +92,18 @@ async def send_contact(
     db.commit()
     db.refresh(contact)
 
+    mail_receiver = os.getenv("MAIL_RECEIVER")
+    if not mail_receiver:
+        raise HTTPException(status_code=500, detail="Receptor de correo no configurado.")
+    
     message = MessageSchema(
         subject="New message from my portfolio",
-        recipients=[os.getenv("MAIL_RECEIVER")],
+        recipients=[mail_receiver],
         body=f"Name: {form.name}\nEmail: {form.email}\nMessage:\n{form.message}",
-        subtype="plain"
+        subtype=MessageType.plain
     )
 
     fm = FastMail(conf)
     await fm.send_message(message)
 
-    return {"message": "Thank you for contacting me, I will respond to you immediately."}
+    return {"message": "Gracias por contactarme, te responderé de inmediato."}
